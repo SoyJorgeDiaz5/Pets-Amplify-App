@@ -69,7 +69,7 @@ public class AddPetActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Log.e("", "Failed to perform AddPetMutation", e);
+                    Log.e(TAG, "Failed to perform AddPetMutation", e);
                     Toast.makeText(AddPetActivity.this, "Failed to add pet", Toast.LENGTH_LONG).show();
                     AddPetActivity.this.finish();
                 }
