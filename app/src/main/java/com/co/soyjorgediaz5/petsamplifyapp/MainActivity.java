@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.amazonaws.amplify.generated.graphql.ListPetsQuery;
+import com.amazonaws.amplify.generated.graphql.OnCreatePetSubscription;
+import com.amazonaws.mobileconnectors.appsync.AppSyncSubscriptionCall;
 import com.amazonaws.mobileconnectors.appsync.fetcher.AppSyncResponseFetchers;
 import com.apollographql.apollo.GraphQLCall;
 import com.apollographql.apollo.api.Response;
@@ -30,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayList<ListPetsQuery.Item> mPets;
     private final String TAG = MainActivity.class.getSimpleName();
+
+    private AppSyncSubscriptionCall subscriptionWatcher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +69,14 @@ public class MainActivity extends AppCompatActivity {
 
         // Query list data when we return to the screen
         query();
+        subscribe();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        subscriptionWatcher.cancel();
     }
 
     private void query() {
@@ -115,4 +127,41 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    private void subscribe(){
+        OnCreatePetSubscription subscription = OnCreatePetSubscription.builder().build();
+        subscriptionWatcher = ClientFactory.appSyncClient().subscribe(subscription);
+        subscriptionWatcher.execute(subCallback);
+    }
+
+    private AppSyncSubscriptionCall.Callback subCallback = new AppSyncSubscriptionCall.Callback() {
+        @Override
+        public void onResponse(@Nonnull Response response) {
+            Log.i("Response", "Received subscription notification: " + response.data().toString());
+
+            // Update UI with the newly added item
+            OnCreatePetSubscription.OnCreatePet data = (
+                    (OnCreatePetSubscription.Data) response.data()).onCreatePet();
+            final ListPetsQuery.Item addedItem = new ListPetsQuery.Item(
+                    data.__typename(), data.id(), data.name(), data.description());
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mPets.add(addedItem);
+                    mAdapterPets.notifyItemInserted(mPets.size()-1);
+                }
+            });
+        }
+
+        @Override
+        public void onFailure(@Nonnull ApolloException e) {
+            Log.e("Error", e.toString());
+        }
+
+        @Override
+        public void onCompleted() {
+            Log.i("Completed", "Subscription completed");
+        }
+    };
 }
