@@ -1,6 +1,8 @@
 package com.co.soyjorgediaz5.petsamplifyapp;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -9,6 +11,8 @@ import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -80,6 +84,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void query() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
+            Log.d(TAG, "WRITE_EXTERNAL_STORAGE permission not granted! Requesting...");
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    2);
+        }
+
         ClientFactory.appSyncClient().query(ListPetsQuery.builder().build())
                 .responseFetcher(AppSyncResponseFetchers.CACHE_AND_NETWORK)
                 .enqueue(queryCallback);
@@ -143,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
             OnCreatePetSubscription.OnCreatePet data = (
                     (OnCreatePetSubscription.Data) response.data()).onCreatePet();
             final ListPetsQuery.Item addedItem = new ListPetsQuery.Item(
-                    data.__typename(), data.id(), data.name(), data.description());
+                    data.__typename(), data.id(), data.name(), data.description(), data.photo());
 
             runOnUiThread(new Runnable() {
                 @Override
