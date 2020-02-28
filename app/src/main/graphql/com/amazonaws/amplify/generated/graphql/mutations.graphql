@@ -7,6 +7,7 @@ mutation CreatePet(
     id
     name
     description
+    photo
   }
 }
 mutation UpdatePet(
@@ -17,6 +18,7 @@ mutation UpdatePet(
     id
     name
     description
+    photo
   }
 }
 mutation DeletePet(
@@ -27,5 +29,6 @@ mutation DeletePet(
     id
     name
     description
+    photo
   }
 }

@@ -4,6 +4,7 @@ query GetPet($id: ID!) {
     id
     name
     description
+    photo
   }
 }
 query ListPets($filter: ModelPetFilterInput, $limit: Int, $nextToken: String) {
@@ -12,6 +13,7 @@ query ListPets($filter: ModelPetFilterInput, $limit: Int, $nextToken: String) {
       id
       name
       description
+      photo
     }
     nextToken
   }
