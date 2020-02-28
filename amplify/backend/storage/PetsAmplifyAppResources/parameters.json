@@ -1,7 +1,7 @@
 {
-    "bucketName": "petsamplifyappee4f23e421e34d45adbc3332cf6cda6c",
-    "authPolicyName": "s3_amplify_dc176b9c",
-    "unauthPolicyName": "s3_amplify_dc176b9c",
+    "bucketName": "[PUT_YOUR_OWN_BUCKET_NAME_HERE]",
+    "authPolicyName": "[PUT_YOUR_OWN_AUTH_POLICY_NAME_HERE]",
+    "unauthPolicyName": "[PUT_YOUR_OWN_AUTH_POLICY_NAME_HERE]",
     "authRoleName": {
         "Ref": "AuthRoleName"
     },
