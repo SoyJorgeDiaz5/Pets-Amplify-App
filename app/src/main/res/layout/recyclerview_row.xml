@@ -17,14 +17,17 @@
         <ImageView
             android:id="@+id/image_view"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="96dp"
             android:layout_weight="30"
-            android:maxHeight="200dp" />
+            android:scaleType="centerCrop"
+            android:background="@android:drawable/ic_menu_camera" />
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_weight="70"
+            android:layout_marginTop="10dp">
 
             <TextView
                 android:id="@+id/txt_name"

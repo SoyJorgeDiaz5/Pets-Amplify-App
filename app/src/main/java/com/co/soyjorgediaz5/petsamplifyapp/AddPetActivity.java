@@ -98,9 +98,9 @@ public class AddPetActivity extends AppCompatActivity {
         );
 
         final AWSAppSyncClient awsAppSyncClient = ClientFactory.appSyncClient();
-        final ListPetsQuery listEventsQuery = ListPetsQuery.builder().build();
+        final ListPetsQuery listPetsQuery = ListPetsQuery.builder().build();
 
-        awsAppSyncClient.query(listEventsQuery)
+        awsAppSyncClient.query(listPetsQuery)
                 .responseFetcher(AppSyncResponseFetchers.CACHE_ONLY)
                 .enqueue(new GraphQLCall.Callback<ListPetsQuery.Data>() {
                     @Override
@@ -121,7 +121,7 @@ public class AddPetActivity extends AppCompatActivity {
                                         "ModelPetConnection",
                                         items,
                                         null));
-                        awsAppSyncClient.getStore().write(listEventsQuery, data). enqueue(null);
+                        awsAppSyncClient.getStore().write(listPetsQuery, data). enqueue(null);
                         Log.d(TAG, "Succesfully wrote item to local store while being offline");
 
                         finishIfOffline();

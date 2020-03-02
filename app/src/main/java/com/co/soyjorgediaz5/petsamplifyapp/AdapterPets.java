@@ -105,6 +105,7 @@ public class AdapterPets extends RecyclerView.Adapter<AdapterPets.ViewHolder> {
                     if (TransferState.COMPLETED == state) {
                         // Handle a completed upload
                         localUrl = localPath;
+                        Log.d(TAG, "localUrl: "+localUrl + "localPath: "+localPath);
                         image_view.setImageBitmap(BitmapFactory.decodeFile(localPath));
                     }
                 }

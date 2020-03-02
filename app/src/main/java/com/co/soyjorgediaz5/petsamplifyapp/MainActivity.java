@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -18,6 +19,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.amazonaws.amplify.generated.graphql.ListPetsQuery;
 import com.amazonaws.amplify.generated.graphql.OnCreatePetSubscription;
+import com.amazonaws.mobile.client.AWSMobileClient;
+import com.amazonaws.mobile.client.SignInUIOptions;
+import com.amazonaws.mobile.client.UserStateDetails;
+import com.amazonaws.mobile.client.UserStateListener;
 import com.amazonaws.mobileconnectors.appsync.AppSyncSubscriptionCall;
 import com.amazonaws.mobileconnectors.appsync.fetcher.AppSyncResponseFetchers;
 import com.apollographql.apollo.GraphQLCall;
@@ -65,12 +70,43 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.this.startActivity(addPetIntent);
             }
         });
+
+        setLogoutListener();
+    }
+
+    private void setLogoutListener() {
+        AWSMobileClient.getInstance().addUserStateListener(new UserStateListener() {
+            @Override
+            public void onUserStateChanged(UserStateDetails userStateDetails) {
+                switch (userStateDetails.getUserState()){
+                    case GUEST:
+                        Log.i("userState", "user is in guest mode");
+                        break;
+                    case SIGNED_OUT:
+                        Log.i("userState", "user is signed out");
+                        showSignIn();
+                        break;
+                    case SIGNED_IN:
+                        Log.i("userState", "user is signed in");
+                        break;
+                    case SIGNED_OUT_USER_POOLS_TOKENS_INVALID:
+                        Log.i("userState", "need to login again");
+                        break;
+                    case SIGNED_OUT_FEDERATED_TOKENS_INVALID:
+                        Log.i("userState", "user logged in via federation, but currently needs new tokens");
+                        break;
+                    default:
+                        Log.e("userState", "unsupported");
+                }
+            }
+        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
+        Log.d(TAG, "OnResume Called");
         // Query list data when we return to the screen
         query();
         subscribe();
@@ -79,8 +115,22 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-
         subscriptionWatcher.cancel();
+    }
+
+    private void signOutEvent() {
+        AWSMobileClient.getInstance().signOut();
+        Log.d(TAG, "User logout");
+        Toast.makeText(MainActivity.this, "User logout", Toast.LENGTH_SHORT).show();
+    }
+
+    private void showSignIn() {
+        try {
+            AWSMobileClient.getInstance().showSignIn(this,
+                    SignInUIOptions.builder().nextActivity(MainActivity.class).build());
+        } catch (Exception e) {
+            Log.e(TAG, e.toString());
+        }
     }
 
     private void query() {
@@ -134,14 +184,14 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (id == R.id.action_signout) {
+            signOutEvent();
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    private void subscribe(){
+    private void subscribe() {
         OnCreatePetSubscription subscription = OnCreatePetSubscription.builder().build();
         subscriptionWatcher = ClientFactory.appSyncClient().subscribe(subscription);
         subscriptionWatcher.execute(subCallback);
@@ -162,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     mPets.add(addedItem);
-                    mAdapterPets.notifyItemInserted(mPets.size()-1);
+                    mAdapterPets.notifyItemInserted(mPets.size() - 1);
                 }
             });
         }
